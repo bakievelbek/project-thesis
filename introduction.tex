@@ -1,84 +1,102 @@
-\section{Problem Description}
-\paragraph{}
-The loss of audio signal fragments in recordings reduces their quality, which makes further processing and utilization complicated.
-Missing segments may contain critical information, particularly in the case of voice recordings, where minor data loss
-critically affect their perception and interpretation.
+\section{Introduction}\label{sec:introduction}
 
-Machine learning-based speech signal restoration technologies offer efficient approaches for reconstructing and predicting
-lost data contributing to the preservation of the integrity of audio material.
+\subsection{What is a speech signal processing?}\label{subsec:what-is-a-speech-signal?}
+Speech is the fundamental means of communication among people in the modern world. It consists of a combination of
+sounds that constitute the human voice. The human voice, produced by the articulatory apparatus for the purpose of
+linguistic communication, can be mathematically represented as a one-dimensional function of time. \cite{schroeder}
 
+The sound generation process, including the production of human speech, occurs in space through vibrations that induce
+changes in air pressure. These fluctuations enable the propagation of sound waves through the medium. Microphones
+convert sound waves into electrical signals, such as voltage or current allowing speech signals to be processed and
+manipulated in digital form.
 
-
-\section{Goal}
-\paragraph{}
-The main task is to create software that reconstructs lost speech signal components using machine learning.
-
-
-\section{Methodology}
-\paragraph{}
-To achieve this goal, the following approach will be used:
-\begin{enumerate}
-    \item \textbf{Creating artificially damaged data:}
-    \begin{itemize}
-        \item Creating a dataset that includes audio files with pre-added artificial damage, such as "gaps" or white noise.
-        \item This method allows you to control the damage process and simplifies the creation of a training dataset.
-    \end{itemize}
-    {\color{gray}
-    \item \textbf{Collecting data with real damage:}
-    \begin{itemize}
-
-        \item Using audio files that have been subject to distortion or noise as a result of recording or transmission.
-
-        \item The main difficulty lies in the need for significant computing resources for training models since the
-        \item diversity and volume of data significantly affect the quality of the result.
-    \end{itemize}}
-
-\end{enumerate}
-
-{\color{red}The first approach is expected to be more efficient in terms of resource costs and scalability.
-
-The second approach could possibly be used in the Master's Thesis.}
+Speech processing encompasses the acquisition, storage, transmission, and output of speech signals in digital format.
+This field represents a specialized area of research situated at the intersection of digital signal processing and
+natural language processing. \cite{priyanka}
 
 
-\section{Technology Stack and Resources for the development}
-\begin{itemize}
-    \item \textbf{Python:} The main programming language for implementing the project and integrating all components.
-    \item \textbf{NumPy and SciPy:} Libraries for analyzing and processing audio signals at a low level.
-    \item \textbf{Librosa:} A tool for extracting and pre-processing audio signal characteristics.
-    \item \textbf{Kaldi, TensorFlow, or PyTorch:} Platforms for creating and training machine learning models that
-    can restore lost segments of an audio signal.
-    \item \textbf{OpenSLR:} Speech signals data acquisition.
-\end{itemize}
+%\section{Problem Description}\label{sec:problem-description}
+%
+%\paragraph{}
+%The loss of audio signal fragments in recordings reduces their quality, which makes further processing and utilization complicated.
+%Missing segments may contain critical information, particularly in the case of voice recordings, where minor data loss
+%critically affect their perception and interpretation.
+%
+%Machine learning-based speech signal restoration technologies offer efficient approaches for reconstructing and predicting
+%lost data contributing to the preservation of the integrity of audio material.
+%
 
-\section{Result}
-\paragraph{}
-The result of the work will be a software solution that allows to process damaged audio files and restore lost
-segments.
-The source code of the project will be published on the GitHub platform with detailed instructions for installation and use.
-
-\section{Report Structure}
-\begin{enumerate}
-    \item \textbf{Introduction:}
-    \begin{itemize}
-        \item Introduction to the problem, justification of the relevance and purpose of the study.
-    \end{itemize}
-    \item \textbf{Literature Review:}
-    \begin{itemize}
-        \item Description of the characteristics of the audio signal and its nature.
-        \item Review of classical methods of audio signal processing (e.g., filters).
-        \item Analysis of modern approaches based on machine learning.
-    \end{itemize}
-    \item \textbf{Methodology:}
-    \begin{itemize}
-        \item Detailed description of data collection methods, technologies, and algorithms used. Only necessary
-        technical information, not the explanation of the whole code.
-    \end{itemize}
-    \item \textbf{Results:}
-    \begin{itemize}
-        \item Evaluation of the model results: quality of restoration, testing on data with a specific type of damage.
-    \end{itemize}
-    \item \textbf{Conclusion:}
-    \begin{itemize}
-        \item Results of the work, and software quality description.
-    \end{itemize}
-\end{enumerate}
+%
+%\section{Goal}
+%\paragraph{}
+%The main task is to create software that reconstructs lost speech signal components using machine learning.
+%
+%
+%\section{Methodology}
+%\paragraph{}
+%To achieve this goal, the following approach will be used:
+%\begin{enumerate}
+%    \item \textbf{Creating artificially damaged data:}
+%    \begin{itemize}
+%        \item Creating a dataset that includes audio files with pre-added artificial damage, such as "gaps" or white noise.
+%        \item This method allows you to control the damage process and simplifies the creation of a training dataset.
+%    \end{itemize}
+%    {\color{gray}
+%    \item \textbf{Collecting data with real damage:}
+%    \begin{itemize}
+%
+%        \item Using audio files that have been subject to distortion or noise as a result of recording or transmission.
+%
+%        \item The main difficulty lies in the need for significant computing resources for training models since the
+%        \item diversity and volume of data significantly affect the quality of the result.
+%    \end{itemize}}
+%
+%\end{enumerate}
+%
+%{\color{red}The first approach is expected to be more efficient in terms of resource costs and scalability.
+%
+%The second approach could possibly be used in the Master's Thesis.}
+%
+%
+%\section{Technology Stack and Resources for the development}
+%\begin{itemize}
+%    \item \textbf{Python:} The main programming language for implementing the project and integrating all components.
+%    \item \textbf{NumPy and SciPy:} Libraries for analyzing and processing audio signals at a low level.
+%    \item \textbf{Librosa:} A tool for extracting and pre-processing audio signal characteristics.
+%    \item \textbf{Kaldi, TensorFlow, or PyTorch:} Platforms for creating and training machine learning models that
+%    can restore lost segments of an audio signal.
+%    \item \textbf{OpenSLR:} Speech signals data acquisition.
+%\end{itemize}
+%
+%\section{Result}
+%\paragraph{}
+%The result of the work will be a software solution that allows to process damaged audio files and restore lost
+%segments.
+%The source code of the project will be published on the GitHub platform with detailed instructions for installation and use.
+%
+%\section{Report Structure}
+%\begin{enumerate}
+%    \item \textbf{Introduction:}
+%    \begin{itemize}
+%        \item Introduction to the problem, justification of the relevance and purpose of the study.
+%    \end{itemize}
+%    \item \textbf{Literature Review:}
+%    \begin{itemize}
+%        \item Description of the characteristics of the audio signal and its nature.
+%        \item Review of classical methods of audio signal processing (e.g., filters).
+%        \item Analysis of modern approaches based on machine learning.
+%    \end{itemize}
+%    \item \textbf{Methodology:}
+%    \begin{itemize}
+%        \item Detailed description of data collection methods, technologies, and algorithms used. Only necessary
+%        technical information, not the explanation of the whole code.
+%    \end{itemize}
+%    \item \textbf{Results:}
+%    \begin{itemize}
+%        \item Evaluation of the model results: quality of restoration, testing on data with a specific type of damage.
+%    \end{itemize}
+%    \item \textbf{Conclusion:}
+%    \begin{itemize}
+%        \item Results of the work, and software quality description.
+%    \end{itemize}
+%\end{enumerate}
