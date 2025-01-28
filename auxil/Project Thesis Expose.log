@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.1) (preloaded format=pdflatex 2024.12.23)  8 JAN 2025 19:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.1) (preloaded format=pdflatex 2025.1.24)  28 JAN 2025 02:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -252,6 +252,7 @@ File: puenc.def 2024-11-05 v7.01l Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
 ... no UTF-8 mapping file for font encoding PU
 )
+Package hyperref Info: Option `colorlinks' set `true' on input line 4040.
 Package hyperref Info: Hyper figures OFF on input line 4157.
 Package hyperref Info: Link nesting OFF on input line 4162.
 Package hyperref Info: Hyper index ON on input line 4165.
@@ -285,7 +286,7 @@ Package hyperref Info: Hyper figures OFF on input line 6042.
 Package hyperref Info: Link nesting OFF on input line 6047.
 Package hyperref Info: Hyper index ON on input line 6050.
 Package hyperref Info: backreferencing OFF on input line 6057.
-Package hyperref Info: Link coloring OFF on input line 6062.
+Package hyperref Info: Link coloring ON on input line 6060.
 Package hyperref Info: Link coloring with OCG OFF on input line 6067.
 Package hyperref Info: PDF/A mode OFF on input line 6072.
 
@@ -354,8 +355,8 @@ File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count297
 \l__pdf_internal_box=\box54
 )
-(/Users/elbekbakiev/PycharmProjects/pythonProject1/auxil/Project Thesis Expose.
-aux)
+(/Users/elbekbakiev/PycharmProjects/pythonProject1/out/Project Thesis Expose.au
+x)
 \openout1 = `"Project Thesis Expose.aux"'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
@@ -437,12 +438,12 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 /00miktex/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
-Package hyperref Info: Link coloring OFF on input line 15.
+Package hyperref Info: Link coloring ON on input line 15.
 
-(/Users/elbekbakiev/PycharmProjects/pythonProject1/auxil/Project Thesis Expose.
-out)
-(/Users/elbekbakiev/PycharmProjects/pythonProject1/auxil/Project Thesis Expose.
-out)
+(/Users/elbekbakiev/PycharmProjects/pythonProject1/out/Project Thesis Expose.ou
+t)
+(/Users/elbekbakiev/PycharmProjects/pythonProject1/out/Project Thesis Expose.ou
+t)
 \@outlinefile=\write3
 \openout3 = `"Project Thesis Expose.out"'.
 
@@ -452,8 +453,8 @@ out)
 
 {/Users/elbekbakiev/Library/Application Support/MiKTeX/texmfs/data/fonts/map/pd
 ftex/pdftex.map}])
-(/Users/elbekbakiev/PycharmProjects/pythonProject1/auxil/Project Thesis Expose.
-toc)
+(/Users/elbekbakiev/PycharmProjects/pythonProject1/out/Project Thesis Expose.to
+c)
 \tf@toc=\write4
 \openout4 = `"Project Thesis Expose.toc"'.
 
@@ -469,44 +470,95 @@ l.19 \newpage
 
 [2] (introduction.tex
 
-[3])
+LaTeX Warning: Citation `faruque' on page 3 undefined on input line 28.
 
-[4] (bibliography.tex)
 
-[5] (github.tex)
+LaTeX Warning: Citation `owens' on page 3 undefined on input line 33.
 
-[6]
-(/Users/elbekbakiev/PycharmProjects/pythonProject1/auxil/Project Thesis Expose.
-aux)
+)
+
+[3] (bibliography.tex
+bibliography.tex:7: Missing $ inserted.
+<inserted text> 
+                $
+l.7 ...1-1_7}{doi.org/10.1007/978-3-662-03861-1_7}
+                                                  
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+bibliography.tex:7: Missing $ inserted.
+<inserted text> 
+                $
+l.7 ...1-1_7}{doi.org/10.1007/978-3-662-03861-1_7}
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+bibliography.tex:15: Missing $ inserted.
+<inserted text> 
+                $
+l.15 ...-5_4}{doi.org/10.1007/978-3-319-15609-5_4}
+                                                  
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+bibliography.tex:15: Missing $ inserted.
+<inserted text> 
+                $
+l.15 ...-5_4}{doi.org/10.1007/978-3-319-15609-5_4}
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+)
+
+[4] (github.tex)
+
+[5]
+(/Users/elbekbakiev/PycharmProjects/pythonProject1/out/Project Thesis Expose.au
+x)
  ***********
 LaTeX2e <2024-11-01> patch level 1
 L3 programming layer <2024-11-02>
  ***********
+
+
+LaTeX Warning: There were undefined references.
+
 Package rerunfilecheck Info: File `"Project Thesis Expose".out' has not changed
 .
-(rerunfilecheck)             Checksum: 904B8CAA4A7E47998C6E4F989AA44E8A;895.
+(rerunfilecheck)             Checksum: CE3ACDD473A21EAAA69C991AFD0CEDA7;433.
  ) 
 Here is how much of TeX's memory you used:
- 10199 strings out of 473650
- 162361 string characters out of 5706403
- 571167 words of memory out of 5000000
- 33150 multiletter control sequences out of 15000+600000
- 564288 words of font info for 57 fonts, out of 8000000 for 9000
+ 10179 strings out of 473650
+ 162152 string characters out of 5706404
+ 569405 words of memory out of 5000000
+ 33144 multiletter control sequences out of 15000+600000
+ 564556 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,5n,79p,371b,514s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </Users/elbekbakiev/Library/Application Support/MiKTeX/texmfs/data/fonts/pk/
-ljfour/jknappen/ec/dpi600/tcrm1200.pk></Users/elbekbakiev/Library/Application S
-upport/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmbx12.pfb></Users/
-elbekbakiev/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/publi
-c/amsfonts/cm/cmr12.pfb></Users/elbekbakiev/Library/Application Support/MiKTeX/
-texmfs/install/fonts/type1/public/amsfonts/cm/cmr17.pfb></Users/elbekbakiev/Lib
-rary/Application Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/c
-mr8.pfb></Users/elbekbakiev/Library/Application Support/MiKTeX/texmfs/install/f
-onts/type1/public/amsfonts/cm/cmti12.pfb>
+ 75i,5n,79p,312b,480s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</Users/elbekbakiev/Library/Application Support/MiKTeX/texmfs/install/fonts/t
+ype1/public/amsfonts/cm/cmbx12.pfb></Users/elbekbakiev/Library/Application Supp
+ort/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmmi12.pfb></Users/elb
+ekbakiev/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public/a
+msfonts/cm/cmmi8.pfb></Users/elbekbakiev/Library/Application Support/MiKTeX/tex
+mfs/install/fonts/type1/public/amsfonts/cm/cmr12.pfb></Users/elbekbakiev/Librar
+y/Application Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmr1
+7.pfb></Users/elbekbakiev/Library/Application Support/MiKTeX/texmfs/install/fon
+ts/type1/public/amsfonts/cm/cmr8.pfb></Users/elbekbakiev/Library/Application Su
+pport/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/e
+lbekbakiev/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public
+/amsfonts/cm/cmti12.pfb>
 Output written on "/Users/elbekbakiev/PycharmProjects/pythonProject1/out/Projec
-t Thesis Expose.pdf" (7 pages, 92648 bytes).
+t Thesis Expose.pdf" (6 pages, 115097 bytes).
 PDF statistics:
- 126 PDF objects out of 1000 (max. 8388607)
- 31 named destinations out of 1000 (max. 500000)
- 57 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 107 PDF objects out of 1000 (max. 8388607)
+ 18 named destinations out of 1000 (max. 500000)
+ 25 words of extra memory for PDF output out of 10000 (max. 10000000)
 

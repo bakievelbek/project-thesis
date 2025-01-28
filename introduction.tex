@@ -1,18 +1,44 @@
 \section{Introduction}\label{sec:introduction}
 
 \subsection{What is a speech signal processing?}\label{subsec:what-is-a-speech-signal?}
-Speech is the fundamental means of communication among people in the modern world. It consists of a combination of
-sounds that constitute the human voice. The human voice, produced by the articulatory apparatus for the purpose of
+Speech is the fundamental means of communication among people in the modern world.
+It consists of a combination of sounds that constitute the human voice.
+The human voice, produced by the articulatory apparatus for the purpose of
 linguistic communication, can be mathematically represented as a one-dimensional function of time. \cite{schroeder}
 
 The sound generation process, including the production of human speech, occurs in space through vibrations that induce
-changes in air pressure. These fluctuations enable the propagation of sound waves through the medium. Microphones
-convert sound waves into electrical signals, such as voltage or current allowing speech signals to be processed and
-manipulated in digital form.
+changes in air pressure.
+These fluctuations enable the propagation of sound waves through the medium.
+Microphones convert sound waves into electrical signals, such as voltage or current allowing speech signals to
+be processed and manipulated in digital form.
 
-Speech processing encompasses the acquisition, storage, transmission, and output of speech signals in digital format.
-This field represents a specialized area of research situated at the intersection of digital signal processing and
-natural language processing. \cite{priyanka}
+
+Speech processing includes the acquisition, storage, transmission, and output of speech signals in digital format.
+This field represents a specialized area of research that represents a digital signal processing. \cite{priyanka}
+
+
+As mentioned earlier, voice signals are variations of pressure traveling through the air.
+These pressure variations create oscillations, can be described as waves, and are called sound waves.
+
+In the context of Signal Speech Processing, the primary task is to analyze and process these sound waves,
+which are recorded using a microphone and converted into digital form.
+
+From a scientific perspective, sounds have an analog nature.
+An analog signal is continuous in time \(n \in N \) and can take any amplitude value \(X_n\).
+This form of representation is known as Pulse-Code Modulation (PCM). \cite{faruque}
+
+Analog sound signals recorded by a microphone undergo a process of digitization, which involves sampling and quantization.
+There are various methods of sampling and quantization, in general, these processes involve dividing a continuous
+signal into equal time intervals, capturing its amplitude at specific points, and rounding the captured amplitude
+values to a finite set of levels to represent the signal in digital form. \cite{owens}
+
+
+The result of these operations is a digital sound signal, which can be visualized as a waveform, like the one shown
+below: (insert image of the sound signal).
+
+
+This transformation from analog to digital form enables efficient processing and analysis of sound data using modern
+technologies.
 
 
 %\section{Problem Description}\label{sec:problem-description}
