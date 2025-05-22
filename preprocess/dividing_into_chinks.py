@@ -5,8 +5,8 @@ import soundfile as sf
 # Configuration
 
 
-input_dir = 'D:\\PyCharm projects\\project-thesis\\LibriSpeech\\train-clean-100'
-output_dir = 'D:\\PyCharm projects\\project-thesis\\LibriSpeech\\train-chunks-100'
+input_dir = '../LibriSpeech/train-clean-100'
+output_dir = '../LibriSpeech/train-chunks-100'
 
 chunk_duration = 3.0  # seconds
 sr = 16000  # target sampling rate

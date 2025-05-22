@@ -4,8 +4,8 @@ import soundfile as sf
 import numpy as np
 
 # Paths
-original_dataset_path = 'D:\\PyCharm projects\\project-thesis\\LibriSpeech\\train-chunks-100'
-corrupted_dataset_path = 'D:\\PyCharm projects\\project-thesis\\LibriSpeech\\train-corrupted-100'
+original_dataset_path = '../LibriSpeech/train-chunks-100'
+corrupted_dataset_path = '../LibriSpeech/train-corrupted-100'
 
 # Parameters
 sr = 16000  # target sampling rate

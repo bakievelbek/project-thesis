@@ -36,7 +36,7 @@ class TDNN(nn.Module):
         return x
 
 
-dataset = SpeechReconstructionDataset(csv_path='D:\\PyCharm projects\\project-thesis\\preprocess\\dataset_index.csv',
+dataset = SpeechReconstructionDataset(csv_path='../preprocess/dataset_index.csv',
                                       segment_duration=3.0)
 dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
 

@@ -22,6 +22,7 @@ class SpeechReconstructionDataset(Dataset):
         self.n_mels = n_mels
         self.segment_duration = segment_duration
         self.transform = transform
+        print('SpeechReconstructionDataset - initialized')
 
     def __len__(self):
         return len(self.data)
@@ -60,11 +61,12 @@ class SpeechReconstructionDataset(Dataset):
         # Convert to torch tensors, add channel dimension (C x F x T)
         corrupted_tensor = torch.tensor(corrupted_feat, dtype=torch.float).unsqueeze(0)
         clean_tensor = torch.tensor(clean_feat, dtype=torch.float).unsqueeze(0)
+        print('Returning tensors')
         return corrupted_tensor, clean_tensor
 
 
 dataset = SpeechReconstructionDataset(
-    csv_path='D:\\PyCharm projects\\project-thesis\\preprocess\\dataset_index.csv',
+    csv_path='../preprocess/dataset_index.csv',
     segment_duration=3.0)
 
 dataloader = DataLoader(dataset, batch_size=16, shuffle=True)

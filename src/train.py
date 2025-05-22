@@ -16,7 +16,7 @@ def normalize(mel_spec):
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = SpeechReconstructionDataset(
-        'D:\\PyCharm projects\\project-thesis\\preprocess\\dataset_index.csv',
+        '../preprocess/dataset_index.csv',
         transform=normalize, segment_duration=3.0)
     dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
 
@@ -25,6 +25,7 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
     epochs = 20
+    print('Training...')
     for epoch in range(epochs):
         model.train()
         running_loss = 0.0
@@ -39,7 +40,7 @@ def main():
             running_loss += loss.item() * corrupted.size(0)
         epoch_loss = running_loss / len(dataset)
         print(f"Epoch {epoch + 1}/{epochs} Loss: {epoch_loss:.4f}")
-        torch.save(model.state_dict(), f"outputs\\model_epoch_{epoch + 1}.pth")
+        torch.save(model.state_dict(), f"../outputs/model_epoch_{epoch + 1}.pth")
 
 
 if __name__ == '__main__':

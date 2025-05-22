@@ -1,8 +1,8 @@
 import os
 import csv
 
-corrupted_root = 'D:\\PyCharm projects\\project-thesis\\LibriSpeech\\train-corrupted-100'
-clean_root = 'D:\\PyCharm projects\\project-thesis\\LibriSpeech\\train-chunks-100'
+corrupted_root = '../LibriSpeech/train-corrupted-100'
+clean_root = '../LibriSpeech/train-chunks-100'
 output_csv = 'dataset_index.csv'
 
 pairs = []
