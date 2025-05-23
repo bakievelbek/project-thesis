@@ -61,7 +61,6 @@ class SpeechReconstructionDataset(Dataset):
         # Convert to torch tensors, add channel dimension (C x F x T)
         corrupted_tensor = torch.tensor(corrupted_feat, dtype=torch.float).unsqueeze(0)
         clean_tensor = torch.tensor(clean_feat, dtype=torch.float).unsqueeze(0)
-        print('Returning tensors')
         return corrupted_tensor, clean_tensor
 
 

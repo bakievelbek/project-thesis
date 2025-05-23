@@ -2,18 +2,17 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
-
+import datetime
 from dataset import SpeechReconstructionDataset
 from model import TDNN
-
 
 def normalize(mel_spec):
     mean = mel_spec.mean()
     std = mel_spec.std()
     return (mel_spec - mean) / (std + 1e-9)
 
-
 def main():
+    print(f'Time: {datetime.datetime.now()}')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = SpeechReconstructionDataset(
         '../preprocess/dataset_index.csv',
@@ -40,8 +39,9 @@ def main():
             running_loss += loss.item() * corrupted.size(0)
         epoch_loss = running_loss / len(dataset)
         print(f"Epoch {epoch + 1}/{epochs} Loss: {epoch_loss:.4f}")
-        torch.save(model.state_dict(), f"../outputs/model_epoch_{epoch + 1}.pth")
-
+        torch.save(model.state_dict(), f"/Users/elbekbakiev/project-thesis/outputs/model_epoch_{epoch + 1}.pth")
+    print(f"Finished Training")
+    print(f'Time: {datetime.datetime.now()}')
 
 if __name__ == '__main__':
     main()

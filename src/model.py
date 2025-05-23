@@ -44,14 +44,3 @@ model = TDNN()
 loss_fn = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-for epoch in range(10):
-    model.train()
-    total_loss = 0
-    for corrupted, clean in dataloader:
-        optimizer.zero_grad()
-        outputs = model(corrupted)
-        loss = loss_fn(outputs, clean)
-        loss.backward()
-        optimizer.step()
-        total_loss += loss.item() * corrupted.size(0)
-    print(f"Epoch {epoch + 1} Loss: {total_loss / len(dataset):.4f}")
