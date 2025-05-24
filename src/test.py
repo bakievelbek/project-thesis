@@ -9,9 +9,9 @@ n_mels = 128
 segment_duration = 3.0  # в секундах
 segment_samples = int(segment_duration * sr)
 
-corrupted_audio_path = '../LibriSpeech/train-corrupted-2/19/198/19-198-0003.flac'
-restored_audio_path = '../restored_long_20.flac'
-model_path = '../outputs/model_epoch_20.pth'
+corrupted_audio_path = '../LibriSpeech/train-corrupted-2/19/198/19-198-0002.flac'
+restored_audio_path = '../restored_long_best_14.flac'
+model_path = '../outputs/best_model_14.pth'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = TDNN()

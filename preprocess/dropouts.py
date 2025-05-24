@@ -12,7 +12,7 @@ sr = 16000  # target sampling rate
 dropout_ms = 50  # length of each dropout segment in milliseconds
 
 
-def apply_multiple_dropouts(segment, sr=16000, min_dropout_ms=40, max_dropout_ms=50, num_dropouts=5):
+def apply_multiple_dropouts(segment, sr=16000, min_dropout_ms=100, max_dropout_ms=150, num_dropouts=3):
     segment = segment.copy()
     audio_length = len(segment)
 
