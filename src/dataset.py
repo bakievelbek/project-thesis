@@ -1,76 +1,76 @@
 import torch
-import librosa
-import numpy as np
-import pandas as pd
-
-from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
+import torchaudio
+import pandas as pd
+import random
 
-
-class SpeechReconstructionDataset(Dataset):
-    def __init__(self, csv_path, sr=16000, n_mels=128, segment_duration=None, transform=None):
-        """
-        Args:
-            csv_path (str): Path to the CSV index file with corrupted and clean audio paths.
-            sr (int): Sampling rate for loading audio.
-            n_mels (int): Number of Mel filter banks.
-            segment_duration (float or None): Duration in seconds to crop audio (optional).
-            transform (callable or None): Optional transform to apply to features.
-        """
-        self.data = pd.read_csv(csv_path)
-        self.sr = sr
-        self.n_mels = n_mels
-        self.segment_duration = segment_duration
-        self.transform = transform
-        print('SpeechReconstructionDataset - initialized')
+class SpeechEnhancementDataset(Dataset):
+    def __init__(self, csv_file, segment_length=4.0, sample_rate=16000, augment=True):
+        self.df = pd.read_csv(csv_file)
+        self.segment_length = segment_length
+        self.sample_rate = sample_rate
+        self.augment = augment
 
     def __len__(self):
-        return len(self.data)
+        return len(self.df)
 
     def load_audio(self, path):
-        audio, _ = librosa.load(path, sr=self.sr, mono=True)
-        if self.segment_duration:
-            max_len = int(self.segment_duration * self.sr)
-            if len(audio) > max_len:
-                audio = audio[:max_len]
+        waveform, sr = torchaudio.load(path)
+        if sr != self.sample_rate:
+            waveform = torchaudio.functional.resample(waveform, sr, self.sample_rate)
+        waveform = waveform[0]
+        return waveform
+
+    def random_chunk(self, waveform):
+        num_samples = int(self.segment_length * self.sample_rate)
+        if len(waveform) > num_samples:
+            start = random.randint(0, len(waveform) - num_samples)
+            chunk = waveform[start:start+num_samples]
+        else:
+            chunk = torch.zeros(num_samples)
+            chunk[:len(waveform)] = waveform
+        return chunk
+
+    def add_white_noise(self, audio, snr_db=10):
+        rms = audio.pow(2).mean().sqrt()
+        noise = torch.randn_like(audio)
+        noise = noise / noise.pow(2).mean().sqrt() * rms / (10 ** (snr_db / 20))
+        return audio + noise
+
+    def add_random_gaps(self, audio, gap_prob=0.1, gap_length=0.1):
+        audio = audio.clone()
+        gap_samples = int(gap_length * self.sample_rate)
+        i = 0
+        while i < len(audio):
+            if random.random() < gap_prob:
+                end = min(i + gap_samples, len(audio))
+                audio[i:end] = 0
+                i = end
             else:
-                # Pad shorter audio with zeros
-                audio = np.pad(audio, (0, max_len - len(audio)))
+                i += 1
         return audio
 
-    def extract_mel_spectrogram(self, audio):
-        mel_spec = librosa.feature.melspectrogram(y=audio, sr=self.sr, n_mels=self.n_mels)
-        mel_db = librosa.power_to_db(mel_spec, ref=np.max)
-        return mel_db
-
     def __getitem__(self, idx):
-        corrupted_path = self.data.iloc[idx]['corrupted_path']
-        clean_path = self.data.iloc[idx]['clean_path']
+        clean_path = self.df.iloc[idx]['clean_path']
+        waveform = self.load_audio(clean_path)
+        waveform = self.random_chunk(waveform)
 
-        corrupted_audio = self.load_audio(corrupted_path)
-        clean_audio = self.load_audio(clean_path)
+        if self.augment:
+            corrupted = waveform.clone()
+            if random.random() < 0.5:
+                corrupted = self.add_white_noise(corrupted, snr_db=random.uniform(5, 20))
+            if random.random() < 0.5:
+                corrupted = self.add_random_gaps(corrupted, gap_prob=0.05, gap_length=0.05)
+        else:
+            corrupted = waveform.clone()
 
-        corrupted_feat = self.extract_mel_spectrogram(corrupted_audio)
-        clean_feat = self.extract_mel_spectrogram(clean_audio)
+        # Convert to magnitude spectrograms
+        spectrogram = torchaudio.transforms.Spectrogram(n_fft=512, hop_length=128, power=2)(waveform)
+        corrupted_spec = torchaudio.transforms.Spectrogram(n_fft=512, hop_length=128, power=2)(corrupted)
 
-        # Optional transform (e.g., normalization)
-        if self.transform:
-            corrupted_feat = self.transform(corrupted_feat)
-            clean_feat = self.transform(clean_feat)
+        # Shape: (freq_bins, time_frames)
+        # For models: (time_frames, freq_bins)
+        spectrogram = spectrogram.T
+        corrupted_spec = corrupted_spec.T
 
-        # Convert to torch tensors, add channel dimension (C x F x T)
-        corrupted_tensor = torch.tensor(corrupted_feat, dtype=torch.float).unsqueeze(0)
-        clean_tensor = torch.tensor(clean_feat, dtype=torch.float).unsqueeze(0)
-        return corrupted_tensor, clean_tensor
-
-
-dataset = SpeechReconstructionDataset(
-    csv_path='../preprocess/dataset_index.csv',
-    segment_duration=3.0)
-
-dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
-
-for corrupted_batch, clean_batch in dataloader:
-    print(corrupted_batch.shape)  # e.g., (16, 1, 128, time_frames)
-    print(clean_batch.shape)
-    break
+        return corrupted_spec, spectrogram  # (corrupted, clean)
