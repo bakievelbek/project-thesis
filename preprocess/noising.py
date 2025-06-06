@@ -15,16 +15,13 @@ def add_white_noise(audio, snr_db):
     return audio + noise
 
 def add_pink_noise(audio, snr_db):
-    # Генерируем белый шум, потом фильтруем его
     rng = np.random.default_rng()
     white = rng.normal(size=audio.shape)
-    # Взвешиваем спектр шума, чтобы сделать его "розовым"
     fft = np.fft.rfft(white)
     S = np.arange(1, fft.size + 1)
     fft = fft / np.sqrt(S)
     pink = np.fft.irfft(fft)
     pink = pink[:audio.shape[0]]
-    # Нормируем под нужный SNR
     rms = np.sqrt(np.mean(audio**2))
     noise_std = rms / (10**(snr_db / 20))
     pink *= noise_std / np.std(pink)
