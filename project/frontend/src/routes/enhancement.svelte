@@ -14,7 +14,7 @@
     let metrics = null;
     let loading = false;
 
-    const backend = "http://localhost:8000"; // Change to server IP/URL if needed
+    const backend = "https://project-thesis-frontend.onrender.com"; // Change to server IP/URL if needed
 
     async function uploadAudio() {
         if (!audioFile) return;

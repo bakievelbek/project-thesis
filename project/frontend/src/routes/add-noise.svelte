@@ -14,7 +14,7 @@
     let originalAudioUrl = "";
     let addNoiseForWholeAudio = false;
     let snr = 10;
-    const backend = "http://localhost:8000";
+    const backend = "https://project-thesis-frontend.onrender.com";
 
 
     async function uploadAudio() {
