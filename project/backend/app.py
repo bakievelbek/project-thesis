@@ -1,17 +1,15 @@
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import torchaudio
-import torch
-import numpy as np
 import os
-from fastapi import Form
-import uuid
-import matplotlib.pyplot as plt
 import librosa.display
-from speechbrain.inference.enhancement import SpectralMaskEnhancement
+import matplotlib.pyplot as plt
+
 from pesq import pesq
 from pystoi import stoi
+
+from fastapi import Form
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+
+from speechbrain.inference.enhancement import SpectralMaskEnhancement
 
 app = FastAPI()
 os.makedirs("uploads", exist_ok=True)

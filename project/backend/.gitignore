@@ -1,2 +1,5 @@
 outputs
 uploads
+
+.venv
+venv
