@@ -1,4 +1,10 @@
 import os
+import uuid
+import torch
+import torchaudio
+
+import numpy as np
+import soundfile as sf
 import librosa.display
 import matplotlib.pyplot as plt
 
@@ -7,8 +13,10 @@ from pystoi import stoi
 
 from fastapi import Form
 from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from scipy.signal import wiener
 from speechbrain.inference.enhancement import SpectralMaskEnhancement
 
 app = FastAPI()
@@ -54,17 +62,39 @@ def save_melspec_plot(waveform, sr, out_path):
     plt.savefig(out_path, bbox_inches='tight')
     plt.close()
 
-def calc_metrics(clean, noisy, enhanced, sr):
+def normalize(waveform):
+    max_val = np.max(np.abs(waveform))
+    if max_val == 0:
+        return waveform
+    return waveform / max_val
+
+
+def calc_metrics(clean, noisy, enhanced, wiener, sr):
     metrics = {}
     try:
+
+        # PESQ calculation
         metrics["pesq_noisy"] = pesq(sr, clean, noisy, 'wb')
         metrics["pesq_enhanced"] = pesq(sr, clean, enhanced, 'wb')
+        metrics["pesq_wiener"] = pesq(sr, clean, wiener, 'wb')
+
+        # STOI calculation
         metrics["stoi_noisy"] = stoi(clean, noisy, sr, extended=False)
         metrics["stoi_enhanced"] = stoi(clean, enhanced, sr, extended=False)
-        metrics["snr_noisy"] = 10 * np.log10(np.mean(clean ** 2) / np.mean((clean - noisy) ** 2))
-        metrics["snr_enhanced"] = 10 * np.log10(np.mean(clean ** 2) / np.mean((clean - enhanced) ** 2))
+        metrics["stoi_wiener"] = stoi(clean, wiener, sr, extended=False)
+
+        # SNR calculation
+        if np.var(clean) == 0:  # Check if clean signal has no variance
+            metrics["snr_noisy"] = np.nan
+            metrics["snr_enhanced"] = np.nan
+            metrics["snr_wiener"] = np.nan
+        else:
+            metrics["snr_noisy"] = 10 * np.log10(np.mean(clean ** 2) / np.mean((clean - noisy) ** 2))
+            metrics["snr_enhanced"] = 10 * np.log10(np.mean(clean ** 2) / np.mean((clean - enhanced) ** 2))
+            metrics["snr_wiener"] = 10 * np.log10(np.mean(clean ** 2) / np.mean((clean - wiener) ** 2))
     except Exception as e:
         metrics["error"] = str(e)
+
     return metrics
 
 
@@ -99,7 +129,7 @@ async def upload_audio(file: UploadFile = File(...)):
         f.write(await file.read())
     waveform, sr = torchaudio.load(in_path)
     waveform = to_mono(waveform)
-    waveform_np = waveform.squeeze().cpu().numpy() if isinstance(waveform, torch.Tensor) else np.squeeze(waveform)
+    waveform_np = normalize(waveform.squeeze().cpu().numpy())
     wave_plot = f"outputs/{uid}_waveform.png"
     melspec_plot = f"outputs/{uid}_melspec.png"
     save_waveform_plot(waveform_np, sr, wave_plot)
@@ -110,38 +140,21 @@ async def upload_audio(file: UploadFile = File(...)):
         "audio_path": in_path
     }
 
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import FileResponse, JSONResponse
-import torchaudio
-import torch
-import numpy as np
-import os
-import uuid
-from speechbrain.inference.enhancement import SpectralMaskEnhancement
-
-# Your helper functions:
-# - save_waveform_plot
-# - save_melspec_plot
-# - calc_metrics
-# - to_mono
 
 @app.post("/enhance")
 async def enhance_audio(
     file: UploadFile = File(...),
     clean_ref: UploadFile = File(None)
 ):
+    # Read File
     uid = str(uuid.uuid4())
     in_path = f"uploads/{uid}_{file.filename}"
     with open(in_path, "wb") as f:
         f.write(await file.read())
     waveform, sr = torchaudio.load(in_path)
     waveform = to_mono(waveform)
-    if sr != 16000:
-        import torchaudio.transforms as T
-        waveform = T.Resample(sr, 16000)(waveform)
-        sr = 16000
 
-    # Enhance
+    # Enhance using model
     enhancer = SpectralMaskEnhancement.from_hparams(
         source="speechbrain/metricgan-plus-voicebank",
         savedir="pretrained_models/metricgan-plus-voicebank"
@@ -151,11 +164,29 @@ async def enhance_audio(
     torchaudio.save(out_path, enhanced.cpu(), sr)
 
     # Generate plots
-    enhanced_np = enhanced.squeeze().cpu().numpy()
+    enhanced = to_mono(enhanced)
+    enhanced_np = normalize(enhanced.squeeze().cpu().numpy())
     wave_plot = f"outputs/{uid}_enhanced_waveform.png"
     melspec_plot = f"outputs/{uid}_enhanced_melspec.png"
     save_waveform_plot(enhanced_np, sr, wave_plot)
     save_melspec_plot(enhanced_np, sr, melspec_plot)
+
+    # Enhance using Wiener filter
+    wiener_signal = wiener(waveform, mysize=29)
+    wiener_signal = np.asarray(wiener_signal).astype(np.float32)
+    if wiener_signal.ndim == 2 and wiener_signal.shape[0] == 1:
+        wiener_signal = wiener_signal.squeeze()  # make mono
+    if np.max(np.abs(wiener_signal)) > 1.0:
+        wiener_signal = wiener_signal / np.max(np.abs(wiener_signal))  # normalize
+    wiener_out_path = f"outputs/{uid}_wiener_signal.wav"
+    wiener_signal = normalize(wiener_signal)
+    sf.write(wiener_out_path, wiener_signal, sr)
+
+    # Generate plots
+    wave_wiener_plot = f"outputs/{uid}_wiener_waveform.png"
+    melspec_wiener_plot = f"outputs/{uid}_wiener_melspec.png"
+    save_waveform_plot(wiener_signal, sr, wave_wiener_plot)
+    save_melspec_plot(wiener_signal, sr, melspec_wiener_plot)
 
     # Metrics calculation
     metrics = {}
@@ -165,19 +196,18 @@ async def enhance_audio(
             f.write(await clean_ref.read())
         clean_waveform, ref_sr = torchaudio.load(ref_path)
         clean_waveform = to_mono(clean_waveform)
-        # Resample clean reference if needed
-        if ref_sr != sr:
-            import torchaudio.transforms as T
-            clean_waveform = T.Resample(ref_sr, sr)(clean_waveform)
         # Prepare numpy arrays for metrics
-        clean_np = clean_waveform.squeeze().cpu().numpy()
-        noisy_np = waveform.squeeze().cpu().numpy()
-        metrics = calc_metrics(clean_np, noisy_np, enhanced_np, sr)
+        clean_np = normalize(clean_waveform.squeeze().cpu().numpy())
+        noisy_np = normalize(waveform.squeeze().cpu().numpy())
+        metrics = calc_metrics(clean_np, noisy_np, enhanced_np, wiener_signal, sr)
 
     return {
         "enhanced_audio": out_path,
+        "enhanced_wiener_audio": wiener_out_path,
         "waveform_plot": wave_plot,
         "melspec_plot": melspec_plot,
+        "waveform_plot_wiener": wave_wiener_plot,
+        "melspec_plot_wiener": melspec_wiener_plot,
         "metrics": metrics
     }
 
@@ -193,6 +223,11 @@ def get_plot(filename: str):
     return FileResponse(f"outputs/{filename}")
 
 
+@app.get("/test-sample/{filename}")
+def get_test_sample(filename: str):
+    return FileResponse(f"testing_sample/{filename}")
+
+
 @app.post("/add_noise")
 async def add_noise(
     file: UploadFile = File(None),
@@ -202,14 +237,12 @@ async def add_noise(
     entire_track_noise: bool = Form(False),
     snr: int = Form(10)
 ):
-    print(num_dropouts)
     uid = str(uuid.uuid4())
     in_path = f"uploads/{uid}_{file.filename}"
     with open(in_path, "wb") as f:
         f.write(await file.read())
     waveform, sr = torchaudio.load(in_path)
     waveform = waveform.squeeze().numpy()
-    print(entire_track_noise)
     # Add noise dropouts
     total_len = len(waveform)
     if entire_track_noise:
@@ -226,6 +259,7 @@ async def add_noise(
     waveform = np.clip(waveform, -1, 1)
 
     out_path = f"outputs/{uid}_noised.wav"
+    waveform = normalize(waveform)
     torchaudio.save(out_path, torch.tensor(waveform).unsqueeze(0), sr)
 
     # Plots

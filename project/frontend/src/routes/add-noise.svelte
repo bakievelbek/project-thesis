@@ -14,7 +14,7 @@
     let originalAudioUrl = "";
     let addNoiseForWholeAudio = false;
     let snr = 10;
-    const backend = "https://project-thesis-frontend.onrender.com";
+    const backend = "http://localhost:8001";
 
 
     async function uploadAudio() {
@@ -57,6 +57,9 @@
     <h1>Add Noise to Audio</h1>
     <input type="file" accept="audio/*" on:change="{e => audioFile = e.target.files[0]}"/>
     <button on:click={uploadAudio} disabled={loading}>Visualize</button>
+    {#if loading}
+        <p>Loading...</p>
+    {/if}
     <div class="main-container">
 
         <div class="audio-column">
@@ -66,7 +69,7 @@
                 <img src={waveformPlot} alt="Waveform"/>
                 <img src={melspecPlot} alt="Melspectrogram"/>
             {:else}
-                <div class="placeholder">Upload corrupted file</div>
+                <div class="placeholder">Upload speech signal</div>
             {/if}
         </div>
     </div>
@@ -90,9 +93,7 @@
         <input type="number" bind:value={snr} disabled={!addNoiseForWholeAudio}>
     </div>
     <button on:click={addNoise} disabled={loading}>Add Noise</button>
-    {#if loading}
-        <p>Loading...</p>
-    {/if}
+
     <div class="main-container">
 
         <div class="audio-column">
