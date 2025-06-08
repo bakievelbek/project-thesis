@@ -1,6 +1,7 @@
 import os
 import uuid
 import torch
+import asyncio
 import torchaudio
 
 import numpy as np
@@ -15,6 +16,7 @@ from fastapi import Form
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import BackgroundTasks
 
 from scipy.signal import wiener
 from speechbrain.inference.enhancement import SpectralMaskEnhancement
@@ -37,9 +39,21 @@ enhancer = SpectralMaskEnhancement.from_hparams(
     savedir="pretrained_models/metricgan-plus-voicebank"
 )
 
+
+async def remove_file_after_delay(paths: list, delay: float = 600.0):
+    print(f'Background task created. Files {paths} will be deleted in {delay} seconds')
+    await asyncio.sleep(delay)
+    print(f'Removing files: {paths}.')
+    for path in paths:
+        try:
+            os.remove(path)
+        except Exception as e:
+            print(f"Failed to delete {path}: {e}")
+
+
 def save_waveform_plot(waveform, sr, out_path):
     plt.figure(figsize=(10, 2.5), dpi=200)
-    plt.plot(np.linspace(0, len(waveform)/sr, len(waveform)), waveform, color='#2a3949', linewidth=1.2)
+    plt.plot(np.linspace(0, len(waveform) / sr, len(waveform)), waveform, color='#2a3949', linewidth=1.2)
     plt.xlabel('Time (s)')
     plt.ylabel('Amplitude')
     plt.title('Waveform')
@@ -47,6 +61,7 @@ def save_waveform_plot(waveform, sr, out_path):
     plt.tight_layout()
     plt.savefig(out_path, bbox_inches='tight')
     plt.close()
+
 
 def save_melspec_plot(waveform, sr, out_path):
     plt.figure(figsize=(10, 3), dpi=200)
@@ -61,6 +76,7 @@ def save_melspec_plot(waveform, sr, out_path):
     plt.tight_layout()
     plt.savefig(out_path, bbox_inches='tight')
     plt.close()
+
 
 def normalize(waveform):
     max_val = np.max(np.abs(waveform))
@@ -98,7 +114,6 @@ def calc_metrics(clean, noisy, enhanced, wiener, sr):
     return metrics
 
 
-
 def to_mono(waveform):
     # waveform: either torch.Tensor or np.ndarray, shape [channels, n] or [n]
     if isinstance(waveform, torch.Tensor):
@@ -121,8 +136,12 @@ def to_mono(waveform):
         else:
             raise ValueError("Unexpected array shape")
 
+
 @app.post("/upload")
-async def upload_audio(file: UploadFile = File(...)):
+async def upload_audio(
+        file: UploadFile = File(...),
+        background_tasks: BackgroundTasks = None
+):
     uid = str(uuid.uuid4())
     in_path = f"uploads/{uid}_{file.filename}"
     with open(in_path, "wb") as f:
@@ -134,6 +153,8 @@ async def upload_audio(file: UploadFile = File(...)):
     melspec_plot = f"outputs/{uid}_melspec.png"
     save_waveform_plot(waveform_np, sr, wave_plot)
     save_melspec_plot(waveform_np, sr, melspec_plot)
+    print([in_path, wave_plot, melspec_plot])
+    background_tasks.add_task(remove_file_after_delay, [in_path, wave_plot, melspec_plot])
     return {
         "waveform_plot": wave_plot,
         "melspec_plot": melspec_plot,
@@ -143,8 +164,9 @@ async def upload_audio(file: UploadFile = File(...)):
 
 @app.post("/enhance")
 async def enhance_audio(
-    file: UploadFile = File(...),
-    clean_ref: UploadFile = File(None)
+        file: UploadFile = File(...),
+        clean_ref: UploadFile = File(None),
+        background_tasks: BackgroundTasks = None
 ):
     # Read File
     uid = str(uuid.uuid4())
@@ -201,6 +223,9 @@ async def enhance_audio(
         noisy_np = normalize(waveform.squeeze().cpu().numpy())
         metrics = calc_metrics(clean_np, noisy_np, enhanced_np, wiener_signal, sr)
 
+    background_tasks.add_task(remove_file_after_delay,
+                              [in_path, ref_path, out_path, wiener_out_path, wave_plot, melspec_plot, wave_wiener_plot,
+                               melspec_wiener_plot])
     return {
         "enhanced_audio": out_path,
         "enhanced_wiener_audio": wiener_out_path,
@@ -218,6 +243,7 @@ def get_audio(filename: str):
         return FileResponse(f"outputs/{filename}")
     return FileResponse(f"uploads/{filename}")
 
+
 @app.get("/plot/{filename}")
 def get_plot(filename: str):
     return FileResponse(f"outputs/{filename}")
@@ -230,12 +256,13 @@ def get_test_sample(filename: str):
 
 @app.post("/add_noise")
 async def add_noise(
-    file: UploadFile = File(None),
-    num_dropouts: int = Form(3),
-    min_dropout_length_ms: int = Form(50),
-    max_dropout_length_ms: int = Form(300),
-    entire_track_noise: bool = Form(False),
-    snr: int = Form(10)
+        file: UploadFile = File(None),
+        num_dropouts: int = Form(3),
+        min_dropout_length_ms: int = Form(50),
+        max_dropout_length_ms: int = Form(300),
+        entire_track_noise: bool = Form(False),
+        snr: int = Form(10),
+        background_tasks: BackgroundTasks = None
 ):
     uid = str(uuid.uuid4())
     in_path = f"uploads/{uid}_{file.filename}"
@@ -267,6 +294,8 @@ async def add_noise(
     melspec_plot = f"outputs/{uid}_noised_melspec.png"
     save_waveform_plot(waveform, sr, wave_plot)
     save_melspec_plot(waveform, sr, melspec_plot)
+    background_tasks.add_task(remove_file_after_delay, [out_path, wave_plot, melspec_plot])
+
     return {
         "audio_path": out_path,
         "waveform_plot": wave_plot,

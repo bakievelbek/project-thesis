@@ -67,7 +67,7 @@
         loading = false;
     }
 
-    async function test_sample() {
+    async function testSample() {
         noisySample = `${backend}/test-sample/noised.wav`
         origSample = `${backend}/test-sample/orig.wav`
     }
@@ -77,13 +77,18 @@
 <main>
     <h1>Speech Enhancement App</h1>
     <div class="description">
-        <p>This is a project thesis prototype app for audio speech signal enhancement.
+        <p>
+            This is a project thesis prototype app for audio speech signal enhancement.
             You can upload an audio file corrupted with noise on the left side, visualize it, and enhance it.
-            The visualization and enhancement processes will display the waveforms and Mel-spectrograms  of the
+            The visualization and enhancement processes will display the waveforms and Mel-spectrograms of the
             corresponding audios.
-            If you don’t have a corrupted signal, you can either corrupt one in the sandbox by clicking <b>'Add noise'</b> in
+            If you don’t have a corrupted signal, you can either corrupt one in the sandbox by clicking <b>'Add
+            noise'</b> in
             the navigation menu above, or use the <b>'Test sample'</b> button below to download samples.
-            <br>Created by Elbek Bakiev.</p>
+
+            <br>Created by Elbek Bakiev.
+            <br><span>All files will be automatically removed from the server 10 minutes after creation</span>
+        </p>
     </div>
 
 
@@ -102,7 +107,7 @@
     <br/>
     <button on:click={uploadAudio} disabled={loading}>Visualize</button>
     <button on:click={enhanceAudio} disabled={loading}>Enhance</button>
-    <button on:click={test_sample} disabled={loading}>Test Sample</button>
+    <button on:click={testSample} disabled={loading}>Test Sample</button>
     {#if loading}
         <p>Loading...</p>
     {/if}
@@ -266,6 +271,10 @@
 
     .description p {
         width: 50%;
+    }
+
+    .description span {
+        color: red;
     }
 
     .placeholder {
