@@ -88,26 +88,25 @@ def normalize(waveform):
 def calc_metrics(clean, noisy, enhanced, wiener, sr):
     metrics = {}
     try:
-
         # PESQ calculation
-        metrics["pesq_noisy"] = pesq(sr, clean, noisy, 'wb')
-        metrics["pesq_enhanced"] = pesq(sr, clean, enhanced, 'wb')
-        metrics["pesq_wiener"] = pesq(sr, clean, wiener, 'wb')
+        metrics["pesq_noisy"] = float(pesq(sr, clean, noisy, 'wb'))
+        metrics["pesq_enhanced"] = float(pesq(sr, clean, enhanced, 'wb'))
+        metrics["pesq_wiener"] = float(pesq(sr, clean, wiener, 'wb'))
 
         # STOI calculation
-        metrics["stoi_noisy"] = stoi(clean, noisy, sr, extended=False)
-        metrics["stoi_enhanced"] = stoi(clean, enhanced, sr, extended=False)
-        metrics["stoi_wiener"] = stoi(clean, wiener, sr, extended=False)
+        metrics["stoi_noisy"] = float(stoi(clean, noisy, sr, extended=False))
+        metrics["stoi_enhanced"] = float(stoi(clean, enhanced, sr, extended=False))
+        metrics["stoi_wiener"] = float(stoi(clean, wiener, sr, extended=False))
 
         # SNR calculation
         if np.var(clean) == 0:  # Check if clean signal has no variance
-            metrics["snr_noisy"] = np.nan
-            metrics["snr_enhanced"] = np.nan
-            metrics["snr_wiener"] = np.nan
+            metrics["snr_noisy"] = None
+            metrics["snr_enhanced"] = None
+            metrics["snr_wiener"] = None
         else:
-            metrics["snr_noisy"] = 10 * np.log10(np.mean(clean ** 2) / np.mean((clean - noisy) ** 2))
-            metrics["snr_enhanced"] = 10 * np.log10(np.mean(clean ** 2) / np.mean((clean - enhanced) ** 2))
-            metrics["snr_wiener"] = 10 * np.log10(np.mean(clean ** 2) / np.mean((clean - wiener) ** 2))
+            metrics["snr_noisy"] = float(10 * np.log10(np.mean(clean ** 2) / np.mean((clean - noisy) ** 2)))
+            metrics["snr_enhanced"] = float(10 * np.log10(np.mean(clean ** 2) / np.mean((clean - enhanced) ** 2)))
+            metrics["snr_wiener"] = float(10 * np.log10(np.mean(clean ** 2) / np.mean((clean - wiener) ** 2)))
     except Exception as e:
         metrics["error"] = str(e)
 
