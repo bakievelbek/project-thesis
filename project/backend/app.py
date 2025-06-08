@@ -137,7 +137,7 @@ def to_mono(waveform):
             raise ValueError("Unexpected array shape")
 
 
-@app.post("/backend/upload")
+@app.post("/upload")
 async def upload_audio(
         file: UploadFile = File(...),
         background_tasks: BackgroundTasks = None
@@ -162,7 +162,7 @@ async def upload_audio(
     }
 
 
-@app.post("/backend/enhance")
+@app.post("/enhance")
 async def enhance_audio(
         file: UploadFile = File(...),
         clean_ref: UploadFile = File(None),
@@ -237,24 +237,24 @@ async def enhance_audio(
     }
 
 
-@app.get("/backend/audio/{filename}")
+@app.get("/audio/{filename}")
 def get_audio(filename: str):
     if os.path.exists(f"outputs/{filename}"):
         return FileResponse(f"outputs/{filename}")
     return FileResponse(f"uploads/{filename}")
 
 
-@app.get("/backend/plot/{filename}")
+@app.get("/plot/{filename}")
 def get_plot(filename: str):
     return FileResponse(f"outputs/{filename}")
 
 
-@app.get("/backend/test-sample/{filename}")
+@app.get("/test-sample/{filename}")
 def get_test_sample(filename: str):
     return FileResponse(f"testing_sample/{filename}")
 
 
-@app.post("/backend/add_noise")
+@app.post("/add_noise")
 async def add_noise(
         file: UploadFile = File(None),
         num_dropouts: int = Form(3),
