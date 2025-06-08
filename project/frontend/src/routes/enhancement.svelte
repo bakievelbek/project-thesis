@@ -4,7 +4,7 @@
     import axios from "axios";
 
     let audioFile = null;
-    let cleanReferenceFile = null; // <-- for clean_ref
+    let cleanReferenceFile = null;
     let waveformPlot = "";
     let melspecPlot = "";
     let enhancedWaveformPlot = "";
@@ -19,7 +19,7 @@
     let metrics = null;
     let loading = false;
 
-    const backend = "http://localhost:8001"; // Change to server IP/URL if needed
+    const backend = "backend";
 
     async function uploadAudio() {
         if (!audioFile) return;
