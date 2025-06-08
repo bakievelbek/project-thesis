@@ -14,7 +14,7 @@
     let originalAudioUrl = "";
     let addNoiseForWholeAudio = false;
     let snr = 10;
-    const backend = "backend/";
+    const backend = "backend";
 
 
     async function uploadAudio() {
