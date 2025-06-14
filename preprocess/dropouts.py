@@ -3,8 +3,8 @@ import librosa
 import soundfile as sf
 import numpy as np
 
-original_dataset_path = '../LibriSpeech/train-wav-100/'
-corrupted_dataset_path = '../LibriSpeech/train-dropouts-full-100/'
+original_dataset_path = '../LibriSpeech/train-wav-100/19/198'
+corrupted_dataset_path = '../LibriSpeech/train-dropouts-full-100/19/198'
 
 sr = 16000
 dropout_ms = 50

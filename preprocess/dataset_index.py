@@ -1,8 +1,8 @@
 # import os
 # import csv
 #
-# corrupted_root = '../LibriSpeech/train-corrupted-100'
-# clean_root = '../LibriSpeech/train-chunks-100'
+# corrupt_dir = '../LibriSpeech/train-chunks-noisy-100/'
+# clean_dir = '../LibriSpeech/train-chunks-100'
 # output_csv = 'dataset_index.csv'
 #
 # pairs = []
@@ -33,65 +33,50 @@
 
 
 
-# import os
-# import csv
-# import random
-#
-# corrupt_dir = '/Users/elbekbakiev/project-thesis/LibriSpeech/train-chunks-corrupt-100/'
-# clean_dir = '/Users/elbekbakiev/project-thesis/LibriSpeech/train-chunks-clean-100'
-# metadata_dir = 'metadata'
-# os.makedirs(metadata_dir, exist_ok=True)
-#
-# pairs = []
-#
-# for fname in os.listdir(corrupt_dir):
-#     corrupt_path = os.path.join(corrupt_dir, fname)
-#     clean_path = os.path.join(clean_dir, fname)
-#     if os.path.exists(clean_path):
-#         pairs.append((corrupt_path, clean_path))
-#
-# print(f"Найдено пар: {len(pairs)}")
-#
-# # Перемешиваем и делим
-# random.seed(42)
-# random.shuffle(pairs)
-#
-# total = len(pairs)
-# train_size = int(0.8 * total)
-# val_size = int(0.1 * total)
-#
-# train = pairs[:train_size]
-# val = pairs[train_size:train_size+val_size]
-# test = pairs[train_size+val_size:]
-#
-# def write_csv(pairs, path):
-#     with open(path, "w", newline="") as f:
-#         writer = csv.writer(f)
-#         writer.writerow(["input_path", "target_path"])
-#         writer.writerows(pairs)
-#
-# write_csv(train, os.path.join(metadata_dir, "train.csv"))
-# write_csv(val, os.path.join(metadata_dir, "val.csv"))
-# write_csv(test, os.path.join(metadata_dir, "test.csv"))
-#
-# print(f"✅ CSV-файлы сохранены в {metadata_dir}")
+import os
+import csv
+import random
 
+corrupt_dir = '../LibriSpeech/train-chunks-noisy-100/'
+clean_dir = '../LibriSpeech/train-chunks-100'
+metadata_dir = 'metadata'
+os.makedirs(metadata_dir, exist_ok=True)
 
+pairs = []
 
-import pandas as pd
+for root, _, files in os.walk(corrupt_dir):
+    for file in files:
+        if file.endswith('.wav'):
+            rel_dir = os.path.join(root)
+            corrupted_path = os.path.join(root, file)
 
-INPUT_CSV = "metadata/train.csv"
-OUTPUT_CSV = "metadata/train-100.csv"
-N = 100   # количество строк (можешь выбрать 20, 50, 100...)
+            clean_path = corrupted_path.replace('train-chunks-noisy-100', 'train-chunks-100')
 
-# Читаем исходный train.csv
-df = pd.read_csv(INPUT_CSV)
+            if os.path.exists(clean_path):
+                pairs.append((corrupted_path, clean_path))
 
-# Берем только первые N строк (можно заменить на random.sample, если хочешь случайный поднабор)
-df_small = df.sample(n=N, random_state=42)
+print(f"Найдено пар: {len(pairs)}")
 
+# Перемешиваем и делим
+random.seed(42)
+random.shuffle(pairs)
 
-# Сохраняем новый csv
-df_small.to_csv(OUTPUT_CSV, index=False)
+total = len(pairs)
+train_size = int(0.9 * total)
+val_size = int(0.1 * total)
 
-print(f"Сохранено {N} строк в {OUTPUT_CSV}")
+train = pairs[:train_size]
+val = pairs[train_size:train_size+val_size]
+
+def write_csv(pairs, path):
+    with open(path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["noisy", "clean"])
+        writer.writerows(pairs)
+
+write_csv(train, os.path.join(metadata_dir, "train.csv"))
+write_csv(val, os.path.join(metadata_dir, "val.csv"))
+
+print(f"✅ CSV-файлы сохранены в {metadata_dir}")
+#
+#
