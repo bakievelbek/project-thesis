@@ -13,7 +13,7 @@ def train_metricgan(
     checkpoint_dir="checkpoints", device=None,
     n_fft=512, hop_length=128
 ):
-    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    device = device or ("cuda" if torch.cuda.is_available() else "mps")
     os.makedirs(checkpoint_dir, exist_ok=True)
 
     # --- Data ---
