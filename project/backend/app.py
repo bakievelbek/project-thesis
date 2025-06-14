@@ -46,7 +46,8 @@ async def remove_file_after_delay(paths: list, delay: float = 600.0):
     print(f'Removing files: {paths}.')
     for path in paths:
         try:
-            os.remove(path)
+            if path:
+                os.remove(path)
         except Exception as e:
             print(f"Failed to delete {path}: {e}")
 
@@ -211,6 +212,7 @@ async def enhance_audio(
 
     # Metrics calculation
     metrics = {}
+    ref_path = ''
     if clean_ref is not None:
         ref_path = f"uploads/{uid}_ref_{clean_ref.filename}"
         with open(ref_path, "wb") as f:
