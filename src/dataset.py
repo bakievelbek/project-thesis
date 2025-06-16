@@ -1,50 +1,35 @@
+# dataset.py
 import torch
 from torch.utils.data import Dataset
-import pandas as pd
 import torchaudio
+import pandas as pd
 
-class AudioPairsDataset(Dataset):
-    def __init__(self, csv_path, audio_len=3, sample_rate=16000, n_fft=512, hop_length=128):
+class SpeechPairsDataset(Dataset):
+    def __init__(self, csv_path, sample_rate=16000, segment_length=3.0):
         self.df = pd.read_csv(csv_path)
         self.sample_rate = sample_rate
-        self.audio_len = audio_len * sample_rate  # seconds to samples
-        self.n_fft = n_fft
-        self.hop_length = hop_length
+        self.segment_length = int(sample_rate * segment_length)
 
     def __len__(self):
         return len(self.df)
 
+    def load_audio(self, path):
+        audio, sr = torchaudio.load(path)
+        if sr != self.sample_rate:
+            audio = torchaudio.functional.resample(audio, sr, self.sample_rate)
+        audio = audio.mean(dim=0)  # mono
+        # Cut or pad to self.segment_length
+        if audio.shape[0] > self.segment_length:
+            audio = audio[:self.segment_length]
+        elif audio.shape[0] < self.segment_length:
+            audio = torch.nn.functional.pad(audio, (0, self.segment_length - audio.shape[0]))
+        return audio
+
     def __getitem__(self, idx):
-        noisy_path = self.df.iloc[idx]['noisy']
-        clean_path = self.df.iloc[idx]['clean']
-        noisy, sr1 = torchaudio.load(noisy_path)
-        clean, sr2 = torchaudio.load(clean_path)
-        # Resample if needed
-        if sr1 != self.sample_rate:
-            noisy = torchaudio.transforms.Resample(orig_freq=sr1, new_freq=self.sample_rate)(noisy)
-        if sr2 != self.sample_rate:
-            clean = torchaudio.transforms.Resample(orig_freq=sr2, new_freq=self.sample_rate)(clean)
-        # Trim or pad to audio_len samples
-        noisy = noisy[:, :self.audio_len]
-        clean = clean[:, :self.audio_len]
-        if noisy.shape[1] < self.audio_len:
-            pad = self.audio_len - noisy.shape[1]
-            noisy = torch.nn.functional.pad(noisy, (0, pad))
-            clean = torch.nn.functional.pad(clean, (0, pad))
-
-        # STFT (for generator and discriminator)
-        stft_noisy = torch.stft(
-            noisy.squeeze(0), n_fft=self.n_fft, hop_length=self.hop_length, return_complex=True
-        )  # [freq, frames]
-        stft_clean = torch.stft(
-            clean.squeeze(0), n_fft=self.n_fft, hop_length=self.hop_length, return_complex=True
-        )
-        # Magnitude and phase (only magnitude for generator)
-        mag_noisy = stft_noisy.abs().T  # [frames, freq]
-        mag_clean = stft_clean.abs().T  # [frames, freq]
-
-        # For discriminator, need real+imag channels: [2, freq, frames]
-        spec_noisy = torch.stack([stft_noisy.real, stft_noisy.imag], dim=0)
-        spec_clean = torch.stack([stft_clean.real, stft_clean.imag], dim=0)
-
-        return mag_noisy, mag_clean, spec_noisy, spec_clean
+        row = self.df.iloc[idx]
+        clean = self.load_audio(row['clean'])
+        noisy = self.load_audio(row['noisy'])
+        return {
+            'clean': clean,
+            'noisy': noisy,
+        }

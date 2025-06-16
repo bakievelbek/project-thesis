@@ -1,107 +1,138 @@
+# train.py
+import argparse
+
 import torch
-from torch.utils.data import DataLoader
-from dataset import AudioPairsDataset
-from model import EnhancementGenerator, MetricDiscriminator
 import torch.nn as nn
-import torch.optim as optim
-from tqdm import tqdm
+from torch.utils.data import DataLoader
+import torchaudio
+from dataset import SpeechPairsDataset
+from model import EnhancementGenerator, MetricDiscriminator
 import os
+import time
 
-def train_metricgan(
-    train_csv, val_csv,
-    epochs=20, batch_size=8, lr=1e-4,
-    checkpoint_dir="checkpoints", device=None,
-    n_fft=512, hop_length=128
-):
-    device = device or ("cuda" if torch.cuda.is_available() else "mps")
-    os.makedirs(checkpoint_dir, exist_ok=True)
+# --------- CONFIG -------------
+CSV_PATH = "train.csv"
+SAVE_DIR = "checkpoints_"
+BATCH_SIZE = 8
+LR = 1e-4
+NUM_EPOCHS = 30
+SAMPLE_RATE = 16000
+SEGMENT_LENGTH = 3.0
+PRINT_FREQ = 10  # Log every N batches
 
-    # --- Data ---
-    train_ds = AudioPairsDataset(train_csv, n_fft=n_fft, hop_length=hop_length)
-    val_ds = AudioPairsDataset(val_csv, n_fft=n_fft, hop_length=hop_length)
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=2)
-    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=2)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {DEVICE}")
+if torch.cuda.is_available():
+    print(f"GPU name: {torch.cuda.get_device_name(0)}")
+    print(f"Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
 
-    # --- Model ---
-    generator = EnhancementGenerator().to(device)
-    discriminator = MetricDiscriminator().to(device)
-    optimizer_G = optim.Adam(generator.parameters(), lr=lr)
-    optimizer_D = optim.Adam(discriminator.parameters(), lr=lr)
-    mse_loss = nn.MSELoss()
+# ------- DATASET & LOADER -------
+dataset = SpeechPairsDataset(CSV_PATH, sample_rate=SAMPLE_RATE, segment_length=SEGMENT_LENGTH)
+loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
+print(f"Total samples: {len(dataset)} | Batches per epoch: {len(loader)}")
 
-    for epoch in range(1, epochs + 1):
-        generator.train()
-        discriminator.train()
-        total_g_loss, total_d_loss = 0, 0
-        print(f"\n[Epoch {epoch}/{epochs}]")
+# ------- MODELS -----------------
+generator = EnhancementGenerator().to(DEVICE)
+discriminator = MetricDiscriminator().to(DEVICE)
+print(f"Generator params: {sum(p.numel() for p in generator.parameters())}")
+print(f"Discriminator params: {sum(p.numel() for p in discriminator.parameters())}")
 
-        # --- Training loop ---
-        for mag_noisy, mag_clean, spec_noisy, spec_clean in tqdm(train_loader, desc="Train"):
-            mag_noisy = mag_noisy.to(device)   # [B, frames, freq]
-            mag_clean = mag_clean.to(device)
-            spec_noisy = spec_noisy.to(device) # [B, 2, freq, frames]
-            spec_clean = spec_clean.to(device)
+# ------- OPTIMIZERS -------------
+optim_g = torch.optim.Adam(generator.parameters(), lr=LR)
+optim_d = torch.optim.Adam(discriminator.parameters(), lr=LR)
 
-            lengths = torch.ones(mag_noisy.shape[0]).to(device)  # [B]
+# ------- LOSSES -----------------
+mse = nn.MSELoss()
+bce = nn.BCEWithLogitsLoss()
 
-            # --- Generator forward ---
-            mask = generator(mag_noisy, lengths)     # [B, frames, freq]
-            enhanced_mag = mask * mag_noisy          # [B, frames, freq]
+# ------- STFT -------------------
+stft = torchaudio.transforms.Spectrogram(n_fft=512, hop_length=128, power=None).to(DEVICE)
 
-            # Prepare enhanced spec for discriminator
-            # We'll use the phase of noisy for enhanced, as in inference
-            # So enhanced_spec = [real, imag] (for disc)
-            phase_noisy = torch.atan2(spec_noisy[:,1], spec_noisy[:,0])  # [B, freq, frames]
-            real = enhanced_mag.transpose(1,2) * torch.cos(phase_noisy)
-            imag = enhanced_mag.transpose(1,2) * torch.sin(phase_noisy)
-            enhanced_spec = torch.stack([real, imag], dim=1)  # [B, 2, freq, frames]
+def mag(x):
+    spec = stft(x)
+    return spec.abs()
 
-            # --- Discriminator step ---
-            real_score = discriminator(spec_clean)
-            fake_score = discriminator(enhanced_spec.detach())
-            d_loss = -torch.mean(real_score) + torch.mean(fake_score)
-            optimizer_D.zero_grad()
-            d_loss.backward()
-            optimizer_D.step()
+def train_epoch(epoch):
+    generator.train()
+    discriminator.train()
+    total_g_loss, total_d_loss = 0.0, 0.0
 
-            # --- Generator adversarial + MSE loss ---
-            fake_score = discriminator(enhanced_spec)
-            g_adv = -torch.mean(fake_score)
-            g_mse = mse_loss(enhanced_mag, mag_clean)
-            g_loss = g_adv + g_mse
-            optimizer_G.zero_grad()
-            g_loss.backward()
-            optimizer_G.step()
+    start_time = time.time()
+    for i, batch in enumerate(loader):
+        noisy = batch['noisy'].to(DEVICE)  # [B, T]
+        clean = batch['clean'].to(DEVICE)  # [B, T]
 
-            total_g_loss += g_loss.item()
-            total_d_loss += d_loss.item()
+        # Debug info on first batch
+        if i == 0:
+            print(f"Epoch {epoch} | Batch shape: noisy {noisy.shape}, clean {clean.shape}")
+            print(f"Sample values (noisy): {noisy[0][:10].cpu().numpy()}")
 
-        print(f"    G_loss={total_g_loss/len(train_loader):.4f}, D_loss={total_d_loss/len(train_loader):.4f}")
+        # Convert to STFT mag
+        noisy_mag = mag(noisy)
+        clean_mag = mag(clean)
+        lengths = torch.full((noisy_mag.shape[0],), noisy_mag.shape[2], dtype=torch.long, device=DEVICE)
 
-        # --- Validation (just MSE) ---
-        generator.eval()
-        val_loss = 0
-        with torch.no_grad():
-            for mag_noisy, mag_clean, _, _ in tqdm(val_loader, desc="Valid"):
-                mag_noisy = mag_noisy.to(device)
-                mag_clean = mag_clean.to(device)
-                lengths = torch.ones(mag_noisy.shape[0]).to(device)
-                mask = generator(mag_noisy, lengths)
-                enhanced_mag = mask * mag_noisy
-                val_loss += mse_loss(enhanced_mag, mag_clean).item()
-        print(f"    Validation MSE: {val_loss/len(val_loader):.4f}")
+        # -- Generator forward --
+        mask = generator(noisy_mag.permute(0,2,1), lengths)
+        enhanced_mag = noisy_mag.permute(0,2,1) * mask  # shape: [B, T, F]
 
-        # --- Save generator checkpoint ---
-        torch.save(generator.state_dict(), os.path.join(checkpoint_dir, f"metricgan_gen_epoch{epoch}.pth"))
+        # -- Discriminator forward --
+        d_in_fake = torch.stack([enhanced_mag, clean_mag.permute(0,2,1)], dim=1)
+        d_in_real = torch.stack([clean_mag.permute(0,2,1), clean_mag.permute(0,2,1)], dim=1)
 
-    print("Training complete!")
+        pred_fake = discriminator(d_in_fake).squeeze(-1)
+        pred_real = discriminator(d_in_real).squeeze(-1)
+
+        # -- Discriminator loss --
+        loss_d = bce(pred_real, torch.ones_like(pred_real)) + bce(pred_fake, torch.zeros_like(pred_fake))
+
+        optim_d.zero_grad()
+        loss_d.backward(retain_graph=True)
+        optim_d.step()
+
+        # -- Generator loss (adversarial + L1 mag) --
+        pred_fake_for_g = discriminator(d_in_fake).squeeze(-1)
+        loss_g_adv = bce(pred_fake_for_g, torch.ones_like(pred_fake_for_g))
+        loss_g_l1 = mse(enhanced_mag, clean_mag.permute(0,2,1))
+        loss_g = loss_g_adv + 0.5 * loss_g_l1
+
+        optim_g.zero_grad()
+        loss_g.backward()
+        optim_g.step()
+
+        total_g_loss += loss_g.item()
+        total_d_loss += loss_d.item()
+
+        # ---- LOGGING ----
+        if (i+1) % PRINT_FREQ == 0 or (i+1) == len(loader):
+            elapsed = time.time() - start_time
+            eta = (elapsed / (i+1)) * (len(loader)-(i+1))
+            print(
+                f"[Epoch {epoch}] Batch {i+1}/{len(loader)} | "
+                f"G_loss: {loss_g.item():.4f} | D_loss: {loss_d.item():.4f} | "
+                f"Elapsed: {elapsed:.1f}s | ETA: {eta:.1f}s"
+            )
+            print(f"  Learning rate: {optim_g.param_groups[0]['lr']:.6f}")
+            print(f"  Example noisy path: {dataset.df.iloc[i]['noisy']}")
+
+    avg_g = total_g_loss / len(loader)
+    avg_d = total_d_loss / len(loader)
+    print(f"=== EPOCH {epoch} SUMMARY ===")
+    print(f"Avg Generator Loss: {avg_g:.4f} | Avg Discriminator Loss: {avg_d:.4f}")
+    print(f"Epoch took {time.time() - start_time:.1f} seconds")
+    return avg_g, avg_d
+
+def main():
+    # -------- TRAIN LOOP -------------
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    for epoch in range(1, NUM_EPOCHS + 1):
+        g_loss, d_loss = train_epoch(epoch)
+        torch.save(generator.state_dict(), f"{SAVE_DIR}/generator_epoch{epoch}.pth")
+        torch.save(discriminator.state_dict(), f"{SAVE_DIR}/discriminator_epoch{epoch}.pth")
+        print(f"[Checkpoint] Saved after epoch {epoch}")
+
+    print("Training finished!")
+
 
 if __name__ == "__main__":
-    train_metricgan(
-        train_csv="train.csv",
-        val_csv="val.csv",
-        epochs=10,
-        batch_size=8,
-        lr=1e-4,
-        checkpoint_dir="checkpoints"
-    )
+    main()
