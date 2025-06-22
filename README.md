@@ -52,7 +52,7 @@ git clone https://github.com/bakievelbek/project-thesis.git
 cd project-thesis
 ```
    
-## Installation using docker (Preferable)
+## Installation using docker (Recommended)
 
 **Navigate to the project directory.**
 ```bash
@@ -67,7 +67,7 @@ docker-compose up --build
 
 The project will be avalable at http://localhost/
 
-## Installation (Optional)
+## Installation (Manual)
 
 **Create a Python virtual environment.**
 ```bash
