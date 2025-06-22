@@ -2,7 +2,7 @@ FROM node:23-slim AS build
 LABEL authors="elbekbakiev"
 
 WORKDIR /app
-COPY ./ /app/
+COPY ./frontend /app/
 RUN npm install
 RUN npm run build
 

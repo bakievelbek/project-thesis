@@ -86,6 +86,20 @@ def normalize(waveform):
     return waveform / max_val
 
 
+def get_snr(clean, processed, frame_len=256):
+    eps = 1e-10
+    num_frames = len(clean) // frame_len
+    snr = []
+    for i in range(num_frames):
+        c = clean[i*frame_len:(i+1)*frame_len]
+        p = processed[i*frame_len:(i+1)*frame_len]
+        noise = c - p
+        s = 10 * np.log10(np.sum(c**2) / (np.sum(noise**2) + eps))
+        snr.append(np.clip(s, -10, 35))  # clip to avoid extreme values
+    return float(np.mean(snr))
+
+
+
 def calc_metrics(clean, noisy, enhanced, wiener, sr):
     metrics = {}
     try:
@@ -95,9 +109,9 @@ def calc_metrics(clean, noisy, enhanced, wiener, sr):
         metrics["pesq_wiener"] = float(pesq(sr, clean, wiener, 'wb'))
 
         # STOI calculation
-        metrics["stoi_noisy"] = float(stoi(clean, noisy, sr, extended=False))
-        metrics["stoi_enhanced"] = float(stoi(clean, enhanced, sr, extended=False))
-        metrics["stoi_wiener"] = float(stoi(clean, wiener, sr, extended=False))
+        metrics["stoi_noisy"] = float(stoi(clean, noisy, sr, extended=True))
+        metrics["stoi_enhanced"] = float(stoi(clean, enhanced, sr, extended=True))
+        metrics["stoi_wiener"] = float(stoi(clean, wiener, sr, extended=True))
 
         # SNR calculation
         if np.var(clean) == 0:  # Check if clean signal has no variance
@@ -105,9 +119,9 @@ def calc_metrics(clean, noisy, enhanced, wiener, sr):
             metrics["snr_enhanced"] = None
             metrics["snr_wiener"] = None
         else:
-            metrics["snr_noisy"] = float(10 * np.log10(np.mean(clean ** 2) / np.mean((clean - noisy) ** 2)))
-            metrics["snr_enhanced"] = float(10 * np.log10(np.mean(clean ** 2) / np.mean((clean - enhanced) ** 2)))
-            metrics["snr_wiener"] = float(10 * np.log10(np.mean(clean ** 2) / np.mean((clean - wiener) ** 2)))
+            metrics["snr_noisy"] = get_snr(clean=clean, processed=noisy)
+            metrics["snr_enhanced"] = get_snr(clean=clean, processed=enhanced)
+            metrics["snr_wiener"] = get_snr(clean=clean, processed=wiener)
     except Exception as e:
         metrics["error"] = str(e)
 

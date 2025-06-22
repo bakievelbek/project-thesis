@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy the backend files into the container
-COPY ./ /app/
+COPY ./backend /app/
 
 RUN pip install --upgrade pip
 RUN pip install pesq

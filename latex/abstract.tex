@@ -1,0 +1,6 @@
+\textbf{Abstract}\\[0.3cm]
+Machine learning is widely applied to the processing and restoration of audio signals. This thesis addresses the restoration of corrupted speech audio signals, which often contain critical information necessary for effective communication and analysis.
+
+A web-based application was developed to enable users to upload degraded speech recordings and receive enhanced, clearer audio. Speech restoration is performed using a pretrained MetricGAN model from the SpeechBrain library, thus providing access to advanced deep learning capabilities without requiring extensive computational resources. Supporting tools such as NumPy, Matplotlib, and Librosa are utilized for audio analysis and visualization, while backend processing is managed with FastAPI and PyTorch.
+
+Evaluation involves artificially introducing noise and distortion to open-access audio materials to simulate real-world degradation scenarios. The quality of the enhanced audio is measured using objective metrics, including PESQ, STOI, and SNR, and results are compared with those produced by the classical Wiener filter method. This practical approach demonstrates the effectiveness of machine learning for speech enhancement and highlights its advantages over traditional techniques.

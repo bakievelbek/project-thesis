@@ -19,7 +19,7 @@
     let metrics = null;
     let loading = false;
 
-    const backend = "backend";
+    const backend = "http://localhost:8000";
 
     async function uploadAudio() {
         if (!audioFile) return;
@@ -78,7 +78,7 @@
     <h1>Speech Enhancement App</h1>
     <div class="description">
         <p>
-            This is a project thesis prototype app for audio speech signal enhancement.
+            This is a project thesis prototype app for audio speech signal enhancement.!!!
             You can upload an audio file corrupted with noise on the left side, visualize it, and enhance it.
             The visualization and enhancement processes will display the waveforms and Mel-spectrograms of the
             corresponding audios.

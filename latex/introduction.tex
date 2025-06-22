@@ -1,0 +1,73 @@
+\pagenumbering{arabic}
+\chapter{Introduction}
+\onehalfspacing
+
+\section{Motivation: The Role of Speech}
+Humans, by their very nature, are social beings who require communication with others. For each individual, communication is as essential as breathing. 
+Speech is one of the primary and most widely used natural means of communication among people. 
+The ability to maintain interaction through verbal communication sets humans apart from the animal world.
+
+Human speech originated in prehistoric times because people needed to understand one another. 
+In the beginning, they learned to convey only the most vital concepts, such as “food,” “fire,” and “danger.” 
+Over time, their vocabulary grew as they learned to hunt, sew their own clothes, and craft tools. 
+All of these activities required new terms. Gradually, individual words evolved into conscious, deliberate speech.
+
+In recent decades, speech has attracted widespread attention and interest. 
+During this time, modern technologies have made it possible to study and investigate this phenomenon of speech in depth, including its structure, how it is produced, and how it is perceived.
+This has allowed the development of advanced technologies to a level that has radically changed the ways humans interact with the world, enabling the recording, transmission, recognition, and even synthesis of speech.
+
+\section{Importance of Speech Signal Processing}
+
+Achievements in the technological sphere of speech processing have considerably improved the quality of life for disabled individuals, 
+providing them with a broader space for independence and opportunities for social integration. 
+Technical progress has made speech recognition, speech synthesis, and advanced recording methods crucial for accessing education, employment, and socialization.
+
+Speech recognition enables individuals with mobility impairments to operate computers and smartphones using voice commands, significantly simplifying their interaction with technology. 
+Meanwhile, text-to-speech solutions provide those who have lost the ability to speak with a way to vocalize written text - an invaluable feature for day-to-day and professional communication.
+Advanced recording techniques deliver high-quality sound, essential for hearing loss users who rely on hearing aids or speech-to-text conversion tools.
+
+
+\section{Problem Statement}
+One of the key issues in the speech signal processing field is the damage or loss of the audio signals.
+
+This problem can arise at various stages — during recording because of background noise or equipment malfunctions, during transmission due to interference or limited channel capacity, and even during storage or playback as a result of compression or file corruption.
+
+Loss of speech fragments or the whole speech recordings results in distortions or a complete breakdown in the transmission of information. This can make speech perception difficult or even impossible. Losing even a small amount of data can lead to serious issues in medical consultation applications, voice-controlled systems, or automated translation.
+
+Speech degradation can generally be divided into two types: \textbf{silenced (missing)} components and \textbf{noisy (corrupted)} components. Silenced components are absent from the signal, often appearing as flat or zero-valued regions. In contrast, noisy components retain the original speech structure but are masked by background noise. These two degradation types pose different challenges and require different machine learning strategies: generative models for missing content and denoising models for corrupted signals.
+
+To address the problem of corrupted signals, various solutions based on both classical methods and machine learning techniques have been developed. Classical approaches, such as Wiener filtering, use statistical models to reduce noise and estimate the original signal. More recently, deep learning methods, particularly deep neural networks (DNNs), have demonstrated significant success in audio reconstruction by learning complex patterns from data. Among these, MetricGAN is especially effective for speech enhancement, as it leverages adversarial learning to directly optimize perceptual quality metrics and effectively reconstruct degraded or noisy audio segments.
+
+
+\section{Research Objective}
+
+The main objective of this research is to develop and implement machine learning methods that are effective for the reconstruction of lost audio signal fragments.
+Accordingly, the work is structured into three key phases:
+\begin{enumerate}
+    \item Representation of the audio signal in digital form using various methods (Waveform, Frequency Domain, and Spectrogram) and visual demonstration of the corruption of audio signal.
+
+    \item Implementation of an effective machine learning model, MetricGAN, for reconstructing degraded or noisy audio signals.
+
+    \item Analysis and comparison of the reconstruction results by evaluating the MetricGAN model against a classical Wiener filtering baseline, using quantitative metrics such as Signal-to-Noise Ratio (SNR), Short-Time Objective Intelligibility (STOI), and Perceptual Evaluation of Speech Quality (PESQ).
+\end{enumerate}
+
+To achieve these objectives, several approaches to audio signal enhancement were explored.  After reviewing and analyzing Wiener filtering for audio signal enhancement, the MetricGAN architecture was selected and implemented as the primary model for reconstructing the degraded audio signal. Finally, the performance of the reconstruction is evaluated using objective quantitative metrics, including SNR, STOI, and PESQ.
+
+\section{Thesis Structure}
+
+This thesis is organized in the following way. 
+
+\textbf{Chapter 1} introduces the motivation for speech signal reconstruction, outlines the problem statement, research objectives, and provides an overview of the thesis structure. 
+
+\textbf{Chapter 2} reviews the fundamental concepts of speech signal processing, covering time and frequency domain representations, spectrogram analysis, and the impact of noise and loss on speech signals. 
+
+\textbf{Chapter 3} describes the architecture of the MetricGAN model for speech enhancement and briefly summarizes the classical Wiener filter method used as a baseline. 
+
+\textbf{Chapter 4} explains the evaluation metrics applied to assess speech quality, including Signal-to-Noise Ratio (SNR), Perceptual Evaluation of Speech Quality (PESQ), and Short-Time Objective Intelligibility (STOI). 
+
+\textbf{Chapter 5} surveys related work, including classical, deep learning, and GAN-based methods for speech enhancement and restoration. 
+
+\textbf{Chapter 6} presents the methodology, detailing the design and implementation of the system, including the user interface, backend processing, integration of the MetricGAN model, and other developed components. 
+
+\textbf{Chapter 7} concludes the thesis by summarizing the findings. The appendix contains code listings for the MetricGAN model and example usage within the project.
+
