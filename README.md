@@ -11,8 +11,8 @@ at Fachhochschule Dortmund University of Applied Sciences and Arts, Embedded Sys
 
 - [Overview](#overview)
 - [Features](#features)
-- [System Architecture](#system-arch)
-- [Installation](#installation)
+- [System Architecture](#system-architecture)
+- [Installation](#installation-using-docker-preferable)
 
 ## Overview
 
@@ -48,8 +48,8 @@ Objective metrics such as PESQ, STOI, and SNR are used for evaluation.
 
 **Clone the repository:**
 ```bash
-git clone https://github.com/yourusername/your-thesis-repo.git
-cd project_thesis
+git clone https://github.com/bakievelbek/project-thesis.git
+cd project-thesis
 ```
    
 ## Installation using docker (Preferable)
